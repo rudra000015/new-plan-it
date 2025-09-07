@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanIt - Enhanced Todo App</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanIt - Enhanced Todo App</title>
+  
+<style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         * {
@@ -515,239 +516,233 @@
             background: #333;
             color: white;
         }
-    </style>
+  </style>
 </head>
 <body>
-    <div class="floating-particles" id="particles"></div>
-    
-    <div class="app-container">
-        <div class="header">
-            <div class="name">
-                <h1>PlanIt</h1>
-                <div class="subtitle">Your Smart Todo Companion</div>
-            </div>
-        </div>
-        
-        <div class="content">
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-number" id="totalCount">0</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number" id="completedCount">0</div>
-                    <div class="stat-label">Done</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number" id="pendingCount">0</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-            </div>
+  <div class="floating-particles" id="particles"></div>
 
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <input type="text" id="inp" placeholder="What needs to be done?" maxlength="100">
-                </div>
-                <select class="priority-select" id="priority">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                </select>
-                <button class="add-btn" onclick="addTodo()">Add</button>
-            </div>
-            
-            <div id="todos"></div>
-            
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-icon">📝</div>
-                <div>No todos yet. Add one above to get started!</div>
-            </div>
-        </div>
+  <div class="app-container">
+    <div class="header">
+      <div class="name">
+        <h1>PlanIt</h1>
+        <div class="subtitle">Your Smart Todo Companion</div>
+      </div>
     </div>
 
-    <script>
-        let todos = [];
-        let counter = 1;
-        let editingIndex = -1;
+    <div class="content">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number" id="totalCount">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="completedCount">0</div>
+          <div class="stat-label">Done</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="pendingCount">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
 
-        function createFloatingParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.width = Math.random() * 8 + 4 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
+      <div class="input-container">
+        <div class="input-wrapper">
+          <input type="text" id="inp" placeholder="What needs to be done?" maxlength="100">
+        </div>
+        <select class="priority-select" id="priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button class="add-btn" onclick="addTodo()">Add</button>
+      </div>
 
-        function addTodo() {
-            const todoText = document.querySelector("#inp").value.trim();
-            const priority = document.querySelector("#priority").value;
-            
-            if (todoText === "") {
-                const inputElement = document.querySelector("#inp");
-                inputElement.classList.add("shake");
-                setTimeout(() => inputElement.classList.remove("shake"), 500);
-                return;
-            }
+      <div id="todos"></div>
 
-            const todo = {
-                title: todoText,
-                number: counter++,
-                completed: false,
-                priority: priority,
-                createdAt: new Date().toISOString()
-            };
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">📝</div>
+        <div>No todos yet. Add one above to get started!</div>
+      </div>
+    </div>
+  </div>
 
-            todos.push(todo);
-            document.querySelector("#inp").value = "";
-            document.querySelector("#priority").value = "medium";
-            
-            const addBtn = document.querySelector(".add-btn");
-            addBtn.classList.add("pulse");
-            setTimeout(() => addBtn.classList.remove("pulse"), 600);
-            
-            render();
-            updateStats();
-        }
+  <script>
+    let todos = [];
+    let editingIndex = -1;
+    const API_URL = "http://localhost:5000/todos";
 
-        function deleteTodo(index) {
-            const todoElement = document.querySelector(`#todo-${index}`);
-            todoElement.classList.add("burst");
-            
-            setTimeout(() => {
-                todos.splice(index, 1);
-                render();
-                updateStats();
-            }, 600);
-        }
+    function createFloatingParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.width = Math.random() * 8 + 4 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
 
-        function toggleTodo(index) {
-            todos[index].completed = !todos[index].completed;
-            render();
-            updateStats();
-        }
+    async function fetchTodos() {
+      const res = await fetch(API_URL);
+      todos = await res.json();
+      render();
+      updateStats();
+    }
 
-        function editTodo(index) {
-            if (editingIndex !== -1) return;
-            editingIndex = index;
-            render();
-        }
+    async function addTodo() {
+      const todoText = document.querySelector("#inp").value.trim();
+      const priority = document.querySelector("#priority").value;
 
-        function saveTodo(index, newText) {
-            if (newText.trim() === "") {
-                cancelEdit();
-                return;
-            }
-            todos[index].title = newText.trim();
-            editingIndex = -1;
-            render();
-        }
+      if (todoText === "") return;
 
-        function cancelEdit() {
-            editingIndex = -1;
-            render();
-        }
+      const newTodo = {
+        title: todoText,
+        completed: false,
+        priority: priority
+      };
 
-        function createTodoComponent(todo, index) {
-            const div = document.createElement("div");
-            div.className = `todo ${todo.completed ? 'completed' : ''}`;
-            div.id = `todo-${index}`;
-            
-            const priorityIndicator = document.createElement("div");
-            priorityIndicator.className = `priority-indicator priority-${todo.priority}`;
-            div.appendChild(priorityIndicator);
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTodo)
+      });
 
-            if (editingIndex === index) {
-                div.innerHTML = `
-                    <div class="todo-left">
-                        <div class="todo-number">${index + 1}</div>
-                        <input class="edit-input" type="text" value="${todo.title}" id="edit-input-${index}" maxlength="100">
-                    </div>
-                    <div class="todo-actions">
-                        <button class="save-btn" onclick="saveTodo(${index}, document.getElementById('edit-input-${index}').value)">Save</button>
-                        <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
-                    </div>
-                `;
-                
-                setTimeout(() => {
-                    const editInput = document.getElementById(`edit-input-${index}`);
-                    editInput.focus();
-                    editInput.select();
-                }, 100);
-            } else {
-                div.innerHTML = `
-                    <div class="todo-left">
-                        <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${index})"></div>
-                        <div class="todo-number">${index + 1}</div>
-                        <div class="todo-text">${todo.title}</div>
-                    </div>
-                    <div class="todo-actions">
-                        <button class="edit-btn" onclick="editTodo(${index})">Edit</button>
-                        <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
-                    </div>
-                `;
-            }
+      const savedTodo = await res.json();
+      todos.push(savedTodo);
 
-            return div;
-        }
+      document.querySelector("#inp").value = "";
+      document.querySelector("#priority").value = "medium";
 
-        function render() {
-            const todosContainer = document.querySelector("#todos");
-            const emptyState = document.querySelector("#emptyState");
-            
-            todosContainer.innerHTML = "";
-            
-            if (todos.length === 0) {
-                emptyState.style.display = "block";
-                return;
-            }
-            
-            emptyState.style.display = "none";
-            
-            todos.forEach((todo, index) => {
-                const element = createTodoComponent(todo, index);
-                todosContainer.appendChild(element);
-            });
-        }
+      render();
+      updateStats();
+    }
 
-        function updateStats() {
-            const total = todos.length;
-            const completed = todos.filter(todo => todo.completed).length;
-            const pending = total - completed;
-            
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('completedCount').textContent = completed;
-            document.getElementById('pendingCount').textContent = pending;
-        }
+    async function deleteTodo(index) {
+      const id = todos[index]._id;
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      todos.splice(index, 1);
+      render();
+      updateStats();
+    }
 
-        // Event listeners
-        document.querySelector("#inp").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") {
-                addTodo();
-            }
-        });
+    async function toggleTodo(index) {
+      const todo = todos[index];
+      todo.completed = !todo.completed;
+      await fetch(`${API_URL}/${todo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todo)
+      });
+      render();
+      updateStats();
+    }
 
-        // Initialize app
-        createFloatingParticles();
-        render();
-        updateStats();
+    function editTodo(index) {
+      if (editingIndex !== -1) return;
+      editingIndex = index;
+      render();
+    }
 
-        // Add some sample todos for demonstration
-        setTimeout(() => {
-            todos.push(
-                { title: "Welcome to PlanIt!", number: counter++, completed: false, priority: "high", createdAt: new Date().toISOString() },
-                { title: "Try editing a todo", number: counter++, completed: false, priority: "medium", createdAt: new Date().toISOString() },
-                { title: "Mark this as complete", number: counter++, completed: false, priority: "low", createdAt: new Date().toISOString() }
-            );
-            render();
-            updateStats();
-        }, 1000);
-    </script>
+    async function saveTodo(index, newText) {
+      if (newText.trim() === "") {
+        cancelEdit();
+        return;
+      }
+      const todo = todos[index];
+      todo.title = newText.trim();
+      await fetch(`${API_URL}/${todo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todo)
+      });
+      editingIndex = -1;
+      render();
+    }
+
+    function cancelEdit() {
+      editingIndex = -1;
+      render();
+    }
+
+    function createTodoComponent(todo, index) {
+      const div = document.createElement("div");
+      div.className = `todo ${todo.completed ? 'completed' : ''}`;
+      div.id = `todo-${index}`;
+
+      const priorityIndicator = document.createElement("div");
+      priorityIndicator.className = `priority-indicator priority-${todo.priority}`;
+      div.appendChild(priorityIndicator);
+
+      if (editingIndex === index) {
+        div.innerHTML = `
+          <div class="todo-left">
+            <div class="todo-number">${index + 1}</div>
+            <input class="edit-input" type="text" value="${todo.title}" id="edit-input-${index}" maxlength="100">
+          </div>
+          <div class="todo-actions">
+            <button class="save-btn" onclick="saveTodo(${index}, document.getElementById('edit-input-${index}').value)">Save</button>
+            <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+          </div>
+        `;
+      } else {
+        div.innerHTML = `
+          <div class="todo-left">
+            <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${index})"></div>
+            <div class="todo-number">${index + 1}</div>
+            <div class="todo-text">${todo.title}</div>
+          </div>
+          <div class="todo-actions">
+            <button class="edit-btn" onclick="editTodo(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+          </div>
+        `;
+      }
+
+      return div;
+    }
+
+    function render() {
+      const todosContainer = document.querySelector("#todos");
+      const emptyState = document.querySelector("#emptyState");
+
+      todosContainer.innerHTML = "";
+
+      if (todos.length === 0) {
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+
+      todos.forEach((todo, index) => {
+        const element = createTodoComponent(todo, index);
+        todosContainer.appendChild(element);
+      });
+    }
+
+    function updateStats() {
+      const total = todos.length;
+      const completed = todos.filter(todo => todo.completed).length;
+      const pending = total - completed;
+
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('completedCount').textContent = completed;
+      document.getElementById('pendingCount').textContent = pending;
+    }
+
+    document.querySelector("#inp").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        addTodo();
+      }
+    });
+
+   
+    createFloatingParticles();
+    fetchTodos();
+  </script>
 </body>
 </html>
