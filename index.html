@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanIt - Enhanced Todo App</title>
+  
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #121212, #093A3E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .app-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #280130, #045758 100%);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        .name h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3); }
+            to { text-shadow: 0 4px 30px rgba(255, 255, 255, 0.6); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 30px 25px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input:focus {
+            border-color: #64b5f6;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .add-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            box-shadow: 0 8px 20px rgba(66, 165, 245, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(66, 165, 245, 0.4);
+            background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+        }
+
+        .add-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat {
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #64b5f6;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #todos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        #todos::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #todos::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        #todos::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .todo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.5s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .todo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .todo:hover::before {
+            left: 100%;
+        }
+
+        .todo:hover {
+            transform: translateY(-3px) scale(1.02);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .todo.completed {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+
+        .todo.completed .todo-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .todo-checkbox.checked {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            border-color: #4caf50;
+        }
+
+        .todo-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .todo-number {
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(66, 165, 245, 0.3);
+        }
+
+        .todo-text {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn, .edit-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+        }
+
+        .edit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.4;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes burst {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) rotate(15deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .burst {
+            animation: burst 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .pulse {
+            animation: pulse 0.6s ease;
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        .edit-input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 2px solid #64b5f6;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+        }
+
+        .save-btn, .cancel-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+            margin-right: 5px;
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, #757575, #616161);
+            color: white;
+        }
+
+        .priority-indicator {
+            width: 4px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .priority-high { background: #f44336; }
+        .priority-medium { background: #ff9800; }
+        .priority-low { background: #4caf50; }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .todo-count {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .priority-select {
+            padding: 8px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .priority-select:focus {
+            border-color: #64b5f6;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .priority-select option {
+            background: #333;
+            color: white;
+        }
+  </style>
+</head>
+<body>
+  <div class="floating-particles" id="particles"></div>
+
+  <div class="app-container">
+    <div class="header">
+      <div class="name">
+        <h1>PlanIt</h1>
+        <div class="subtitle">Your Smart Todo Companion</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number" id="totalCount">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="completedCount">0</div>
+          <div class="stat-label">Done</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="pendingCount">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+
+      <div class="input-container">
+        <div class="input-wrapper">
+          <input type="text" id="inp" placeholder="What needs to be done?" maxlength="100">
+        </div>
+        <select class="priority-select" id="priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button class="add-btn" onclick="addTodo()">Add</button>
+      </div>
+
+      <div id="todos"></div>
+
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">📝</div>
+        <div>No todos yet. Add one above to get started!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let todos = [];
+    let editingIndex = -1;
+    const API_URL = "http://localhost:5000/todos";
+
+    function createFloatingParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.width = Math.random() * 8 + 4 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    async function fetchTodos() {
+      const res = await fetch(API_URL);
+      todos = await res.json();
+      render();
+      updateStats();
+    }
+
+    async function addTodo() {
+      const todoText = document.querySelector("#inp").value.trim();
+      const priority = document.querySelector("#priority").value;
+
+      if (todoText === "") return;
+
+      const newTodo = {
+        title: todoText,
+        completed: false,
+        priority: priority
+      };
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTodo)
+      });
+
+      const savedTodo = await res.json();
+      todos.push(savedTodo);
+
+      document.querySelector("#inp").value = "";
+      document.querySelector("#priority").value = "medium";
+
+      render();
+      updateStats();
+    }
+
+    async function deleteTodo(index) {
+      const id = todos[index]._id;
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      todos.splice(index, 1);
+      render();
+      updateStats();
+    }
+
+    async function toggleTodo(index) {
+      const todo = todos[index];
+      todo.completed = !todo.completed;
+      await fetch(`${API_URL}/${todo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todo)
+      });
+      render();
+      updateStats();
+    }
+
+    function editTodo(index) {
+      if (editingIndex !== -1) return;
+      editingIndex = index;
+      render();
+    }
+
+    async function saveTodo(index, newText) {
+      if (newText.trim() === "") {
+        cancelEdit();
+        return;
+      }
+      const todo = todos[index];
+      todo.title = newText.trim();
+      await fetch(`${API_URL}/${todo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todo)
+      });
+      editingIndex = -1;
+      render();
+    }
+
+    function cancelEdit() {
+      editingIndex = -1;
+      render();
+    }
+
+    function createTodoComponent(todo, index) {
+      const div = document.createElement("div");
+      div.className = `todo ${todo.completed ? 'completed' : ''}`;
+      div.id = `todo-${index}`;
+
+      const priorityIndicator = document.createElement("div");
+      priorityIndicator.className = `priority-indicator priority-${todo.priority}`;
+      div.appendChild(priorityIndicator);
+
+      if (editingIndex === index) {
+        div.innerHTML = `
+          <div class="todo-left">
+            <div class="todo-number">${index + 1}</div>
+            <input class="edit-input" type="text" value="${todo.title}" id="edit-input-${index}" maxlength="100">
+          </div>
+          <div class="todo-actions">
+            <button class="save-btn" onclick="saveTodo(${index}, document.getElementById('edit-input-${index}').value)">Save</button>
+            <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+          </div>
+        `;
+      } else {
+        div.innerHTML = `
+          <div class="todo-left">
+            <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${index})"></div>
+            <div class="todo-number">${index + 1}</div>
+            <div class="todo-text">${todo.title}</div>
+          </div>
+          <div class="todo-actions">
+            <button class="edit-btn" onclick="editTodo(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+          </div>
+        `;
+      }
+
+      return div;
+    }
+
+    function render() {
+      const todosContainer = document.querySelector("#todos");
+      const emptyState = document.querySelector("#emptyState");
+
+      todosContainer.innerHTML = "";
+
+      if (todos.length === 0) {
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+
+      todos.forEach((todo, index) => {
+        const element = createTodoComponent(todo, index);
+        todosContainer.appendChild(element);
+      });
+    }
+
+    function updateStats() {
+      const total = todos.length;
+      const completed = todos.filter(todo => todo.completed).length;
+      const pending = total - completed;
+
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('completedCount').textContent = completed;
+      document.getElementById('pendingCount').textContent = pending;
+    }
+
+    document.querySelector("#inp").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        addTodo();
+      }
+    });
+
+   
+    createFloatingParticles();
+    fetchTodos();
+  </script>
+</body>
+</html>
